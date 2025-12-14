@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ game.name }} - Gaming Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            {% if game.image %}
+                <img src="{{ game.image.url }}" class="img-fluid rounded" alt="{{ game.name }}" style="max-height: 400px; object-fit: cover; width: 100%;">
+            {% else %}
+                <div class="bg-secondary d-flex align-items-center justify-content-center rounded" style="height: 400px;">
+                    <i class="fas fa-image text-white" style="font-size: 5rem;"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1 class="mb-3">{{ game.name }}</h1>
+            
+            <div class="mb-3">
+                <span class="badge bg-primary me-2">{{ game.genre }}</span>
+                <span class="badge bg-warning text-dark">{{ game.rating }} ★</span>
+            </div>
+
+            <p class="lead">{{ game.description }}</p>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="stat-box">
+                        <strong>Дата выпуска:</strong>
+                        <p class="text-primary">{{ game.release_date|date:'d.m.Y' }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-box">
+                        <strong>Игроков в игре:</strong>
+                        <p class="text-primary">{{ players_count }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+                {% if not player_game %}
+                <form method="post" action="{% url 'start_game' game.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-play"></i> Начать играть
+                    </button>
+                </form>
+                {% else %}
+                <button class="btn btn-secondary btn-lg" disabled>
+                    <i class="fas fa-check"></i> Вы уже играете
+                </button>
+                {% endif %}
+                <a href="{% url 'add_review' game.pk %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-star"></i> Написать рецензию
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Войдите, чтобы играть</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if reviews %}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2 class="mb-4">Рецензии ({{ reviews.count }})</h2>
+            {% for review in reviews %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h5 class="card-title mb-0">{{ review.title }}</h5>
+                            <small class="text-muted">
+                                <strong>{{ review.player.user.username }}</strong> - 
+                                <span class="text-warning">{{ review.rating }} ⭐</span>
+                            </small>
+                        </div>
+                        <small class="text-muted">{{ review.created_at|date:'d.m.Y H:i' }}</small>
+                    </div>
+                    <p class="card-text">{{ review.text }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">Достижения</h2>
+            {% if achievements %}
+            <div class="row">
+                {% for achievement in achievements %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        {% if achievement.icon %}
+                            <img src="{{ achievement.icon.url }}" class="card-img-top" alt="{{ achievement.name }}" style="height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 150px;">
+                                <i class="fas fa-star text-warning" style="font-size: 2rem;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ achievement.name }}</h5>
+                            <p class="card-text text-muted small">{{ achievement.description }}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-info">{{ achievement.difficulty }}</span>
+                            </div>
+                            <p class="mb-2">
+                                <i class="fas fa-star text-warning"></i> {{ achievement.points }} очков
+                                <br>
+                                <i class="fas fa-bolt text-success"></i> {{ achievement.experience_reward }} опыта
+                            </p>
+                            {% if user.is_authenticated %}
+                                {% if user.player in achievement.players.all %}
+                                    <button class="btn btn-sm btn-success w-100" disabled>
+                                        <i class="fas fa-check"></i> Получено
+                                    </button>
+                                {% else %}
+                                    <form method="post" action="{% url 'add_achievement' achievement.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                                            Получить
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">Достижения для этой игры еще не добавлены</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

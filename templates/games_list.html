@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Все игры - Gaming Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Каталог игр</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <h5>Фильтр по жанру</h5>
+            <div class="list-group">
+                <a href="{% url 'games_list' %}" class="list-group-item list-group-item-action {% if not selected_genre %}active{% endif %}">
+                    Все игры
+                </a>
+                {% for genre in genres %}
+                <a href="?genre={{ genre }}" class="list-group-item list-group-item-action {% if selected_genre == genre %}active{% endif %}">
+                    {{ genre }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="row">
+                {% for game in games %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        {% if game.image %}
+                            <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.name }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 250px;">
+                                <i class="fas fa-image text-white" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ game.name }}</h5>
+                            <p class="card-text text-muted small">{{ game.description|truncatewords:15 }}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-primary">{{ game.genre }}</span>
+                                <span class="badge bg-warning text-dark">{{ game.rating }} ★</span>
+                            </div>
+                            <p class="text-muted small">{{ game.release_date|date:'d.m.Y' }}</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{% url 'game_detail' game.pk %}" class="btn btn-primary w-100">
+                                Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">Игры по фильтру не найдены</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

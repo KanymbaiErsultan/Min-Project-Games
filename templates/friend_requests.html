@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Заявки в друзья - Gaming Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Заявки в друзья</h1>
+
+    {% if received_requests %}
+    <div class="row">
+        {% for request in received_requests %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            {{ request.from_player.user.get_full_name|default:request.from_player.user.username }}
+                        </h5>
+                        <span class="level-badge">Уровень {{ request.from_player.level }}</span>
+                    </div>
+                    
+                    <p class="text-muted small mb-3">@{{ request.from_player.user.username }}</p>
+                    
+                    <div class="stat-box mb-3">
+                        <p class="mb-0">Очки: <span class="text-primary">{{ request.from_player.total_points }}</span></p>
+                    </div>
+
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" value="{{ request.pk }}">
+                        <button type="submit" name="action" value="accept" class="btn btn-success flex-grow-1">
+                            <i class="fas fa-check"></i> Принять
+                        </button>
+                        <button type="submit" name="action" value="decline" class="btn btn-danger flex-grow-1">
+                            <i class="fas fa-times"></i> Отклонить
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        У вас нет заявок в друзья. <a href="{% url 'search_players' %}">Найти друзей</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

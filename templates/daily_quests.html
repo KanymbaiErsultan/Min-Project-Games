@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Ежедневные квесты - Gaming Platform{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1 class="display-4">Ежедневные квесты</h1>
+        <p class="lead">Выполняй задания и получай награды</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        {% for quest in quests %}
+        {% with progress=quest_progress|get_item:quest.pk %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if progress.completed %}
+                            <span class="badge bg-success"><i class="fas fa-check"></i> Выполнено</span>
+                        {% else %}
+                            <span class="badge bg-warning">Активно</span>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="card-title">{{ quest.title }}</h5>
+                    <p class="card-text text-muted">{{ quest.description }}</p>
+
+                    <div class="stat-box mb-3">
+                        <p class="mb-1">
+                            <i class="fas fa-star text-warning"></i>
+                            {{ quest.reward_points }} очков
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-bolt text-success"></i>
+                            {{ quest.reward_experience }} опыта
+                        </p>
+                    </div>
+
+                    {% if progress.completed %}
+                    <button class="btn btn-success w-100" disabled>
+                        <i class="fas fa-check"></i> Завершено
+                    </button>
+                    {% else %}
+                    <form method="post" action="{% url 'complete_quest' quest.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100">
+                            Завершить
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">Квесты недоступны</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Фильтр для шаблонов
+Django.jQuery = undefined;
+</script>
+{% endblock %}

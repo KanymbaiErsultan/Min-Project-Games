@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет - Gaming Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Личный кабинет</h1>
+
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle" style="font-size: 5rem; color: var(--primary-color);"></i>
+                    </div>
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    <p>{{ user.email }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Статистика</h5>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <strong>Текущий уровень</strong>
+                                <h3 class="text-primary">{{ player.level }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <strong>Общие очки</strong>
+                                <h3 class="text-primary">{{ player.total_points }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <strong>Прогресс к уровню {{ player.level|add:1 }}</strong>
+                        <div class="exp-bar mt-2">
+                            <div class="exp-fill" style="width: {{ player.exp_progress }}%;"></div>
+                        </div>
+                        <small class="text-muted">{{ player.experience|add:0 }} / {{ player.exp_to_next_level }} опыта</small>
+                    </div>
+
+                    <div class="stat-box">
+                        <strong>Статистика</strong>
+                        <p class="mb-0">Игр сыграно: <span class="text-primary">{{ games.count }}</span></p>
+                        <p class="mb-0">Достижений получено: <span class="text-primary">{{ achievements.count }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-4">Мои игры</h2>
+    <div class="row">
+        {% for game_progress in games %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                {% if game_progress.game.image %}
+                    <img src="{{ game_progress.game.image.url }}" class="card-img-top" alt="{{ game_progress.game.name }}" style="height: 150px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 150px;">
+                        <i class="fas fa-image text-white"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ game_progress.game.name }}</h5>
+                    <p class="text-muted">{{ game_progress.game.genre }}</p>
+                    <div class="stat-box mb-3">
+                        <p class="mb-1"><strong>Уровень:</strong> {{ game_progress.game_level }}</p>
+                        <p class="mb-1"><strong>Очки:</strong> {{ game_progress.game_points }}</p>
+                        <p class="mb-0"><strong>Часов:</strong> {{ game_progress.hours_played }}</p>
+                    </div>
+                    <a href="{% url 'game_detail' game_progress.game.pk %}" class="btn btn-primary btn-sm w-100">
+                        Подробнее
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Вы еще не начали ни одну игру. <a href="{% url 'games_list' %}">Найти игру</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="my-4">Мои достижения</h2>
+    <div class="row">
+        {% for achievement in achievements %}
+        <div class="col-md-3 mb-4 text-center">
+            <div class="badge-achievement">
+                {% if achievement.icon %}
+                    <img src="{{ achievement.icon.url }}" alt="{{ achievement.name }}" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary-color); object-fit: cover; margin-bottom: 10px;">
+                {% else %}
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background-color: #1a1a1a; border: 2px solid var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="fas fa-star" style="font-size: 2rem; color: var(--accent-color);"></i>
+                    </div>
+                {% endif %}
+                <h6>{{ achievement.name }}</h6>
+                <small class="text-muted">{{ achievement.game.name }}</small>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                У вас еще нет достижений. <a href="{% url 'games_list' %}">Начать игру</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
